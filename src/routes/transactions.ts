@@ -21,13 +21,19 @@ export async function transactionsRoutes(app: FastifyInstance) {
     },
   )
 
-  app.get('/sumary', { preHandler: [checkSessionIdExists] }, async () => {
-    const sumary = await dbKnex('transactions')
-      .sum('amount', { as: 'amount' })
-      .first()
+  app.get(
+    '/sumary',
+    { preHandler: [checkSessionIdExists] },
+    async (request) => {
+      const { sessionId } = request.cookies
+      const sumary = await dbKnex('transactions')
+        .where('session_id', sessionId)
+        .sum('amount', { as: 'amount' })
+        .first()
 
-    return sumary
-  })
+      return sumary
+    },
+  )
 
   app.get('/:id', { preHandler: [checkSessionIdExists] }, async (request) => {
     const getTransactionsParamsSchema = z.object({
@@ -36,7 +42,14 @@ export async function transactionsRoutes(app: FastifyInstance) {
 
     const { id } = getTransactionsParamsSchema.parse(request.params)
 
-    const transaction = await dbKnex('transactions').where('id', id).first()
+    const { sessionId } = request.cookies
+
+    const transaction = await dbKnex('transactions')
+      .where({
+        session_id: sessionId,
+        id,
+      })
+      .first()
 
     return { transaction }
   })
