@@ -1,12 +1,15 @@
 import fastify from 'fastify'
-import db from './database'
+import cookie from '@fastify/cookie'
+
 import { env } from './env'
+import { transactionsRoutes } from './routes/transactions'
 
 const app = fastify()
 
-app.get('/hello', async () => {
-  const transaction = await db('transactions').where('amount', 1000).select('*')
-  return transaction
+app.register(cookie)
+
+app.register(transactionsRoutes, {
+  prefix: 'transactions',
 })
 
 app

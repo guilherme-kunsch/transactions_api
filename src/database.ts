@@ -13,5 +13,5 @@ export const config: Knex.Config = {
   },
 }
 
-const db = knex(config)
-export default db
+const dbKnex = knex(config)
+export default dbKnex
